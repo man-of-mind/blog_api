@@ -1,7 +1,7 @@
 from xmlrpc.client import Boolean
 from pydantic import BaseModel
 from datetime import datetime
-from typing import Union    
+from typing import List, Union    
 
 class PostBase(BaseModel):
     title: str
@@ -9,15 +9,7 @@ class PostBase(BaseModel):
     body: str
     posted_on: datetime
 
-
-class PostCreate(PostBase):
-    pass
-    class Config:
-        orm_mode = True
-
-
 class Post(PostBase):
-    id: int
     user_id: int
 
     class Config:
@@ -127,6 +119,7 @@ class Comment_dislikes(Comment_dislikesBase):
         orm_mode = True
 
 class User(BaseModel):
+    name: str
     email: str
     password: str
     is_active: Boolean
@@ -134,3 +127,21 @@ class User(BaseModel):
     
     class Config:
         orm_mode = True
+        
+
+class ShowUser(BaseModel):
+    name: str
+    email: str
+    is_admin: Boolean
+    posts: List[Post] = []
+    
+    class Config():
+        orm_mode = True
+        
+
+class ShowPost(BaseModel):
+    title: str
+    body: str
+    snippet: str
+    posted_on: datetime
+    added_by: ShowUser

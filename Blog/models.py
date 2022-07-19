@@ -1,15 +1,17 @@
 from sqlalchemy import Column, Boolean, DateTime, ForeignKey, String, Integer, Text
 from Blog.database import Base
+from sqlalchemy.orm import relationship
 
 
 class User(Base):
     __tablename__ = "users" 
     id = Column(Integer, primary_key=True, index=True)
-    name = Column(String)
+    name = Column(String(200))
     email = Column(String(40), unique=True, index=True)
     hashed_password = Column(String(200))
     is_active = Column(Boolean, default=True)
     is_admin = Column(Boolean, default=False)
+    posts = relationship("Post", back_populates="added_by")
 
 
 class Post(Base):
@@ -19,6 +21,7 @@ class Post(Base):
     snippet = Column(Text)
     posted_on = Column(DateTime)
     user_id = Column(Integer, ForeignKey("users.id"))
+    added_by = relationship("User", back_populates="posts")
     body = Column(Text)
     
  
