@@ -5,50 +5,36 @@ from Blog import schemas, models
 from sqlalchemy.orm import Session
 from Blog.database import get_db
 from typing import List
+from Blog.routers.repository import post_repository
 
 
-router = APIRouter()
+router = APIRouter(
+    prefix="/post",
+    tags=['Posts']
+)
 
 
 
-@router.post('/blog/new/', status_code=status.HTTP_201_CREATED, tags=['Posts'])
+@router.post('/new/', status_code=status.HTTP_201_CREATED)
 def new_blog_post(request: schemas.Post, db: Session = Depends(get_db)):
-    new_blog_post = models.Post(title=request.title, body=request.body, snippet=request.snippet, posted_on=request.posted_on)
-    db.add(new_blog_post)
-    db.commit()
-    db.refresh(new_blog_post)
-    return new_blog_post
+    return post_repository.create(request, db)
 
 
-@router.get('/posts/all', status_code=status.HTTP_200_OK, response_model=List[schemas.Post], tags=['Posts'])
+@router.get('/all', status_code=status.HTTP_200_OK, response_model=List[schemas.ShowPost])
 def blog_posts(db: Session = Depends(get_db)):
-    posts = db.query(models.Post).all()
-    return posts
+    return post_repository.get_all(db)
 
 
-@router.delete('/post/{post_id}/remove', status_code=status.HTTP_204_NO_CONTENT, tags=['Posts'])
+@router.delete('/{post_id}/remove', status_code=status.HTTP_204_NO_CONTENT)
 def remove_post(post_id: int, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == post_id).delete(synchronize_session=False);
-    if not post.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog with id {} not found".format(post_id))
-    post.delete(synchronize_session=False)
-    db.commit()
-    return {'response': 'Blog post deleted'}
+    return post_repository.delete(post_id, db)
     
 
-@router.put('/post/{post_id}/update', status_code=status.HTTP_202_ACCEPTED, tags=['Posts'])
+@router.put('/{post_id}/update', status_code=status.HTTP_202_ACCEPTED)
 def update_blog(post_id: int, request: schemas.Post, db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == post_id)
-    if not post.first():
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Blog with id {} not found".format(post_id))
-    post.update(request, synchronize_session=False)
-    db.commit()
-    return {'response': "Sucessfully updated"}
+    return post_repository.update(request, post_id, db)
 
 
-@router.get('posts/{post_id}', response_model=schemas.ShowPost, status_code=status.HTTP_200_OK, tags=['Posts'])
+@router.get('/{post_id}', response_model=schemas.ShowPost, status_code=status.HTTP_200_OK)
 def blog_post(post_id: int,  db: Session = Depends(get_db)):
-    post = db.query(models.Post).filter(models.Post.id == post_id).first()
-    if not post:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='No blog post with the id of {}'.format(post_id))
-    return post
+    return post_repository.show(post_id, db)

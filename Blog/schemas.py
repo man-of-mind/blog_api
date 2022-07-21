@@ -145,3 +145,20 @@ class ShowPost(BaseModel):
     snippet: str
     posted_on: datetime
     added_by: ShowUser
+    
+    class Config():
+        orm_mode = True
+        
+        
+class Login(BaseModel):
+    username: str
+    password: str
+    
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str
+
+
+class TokenData(BaseModel):
+    username: Union[str, None] = None
