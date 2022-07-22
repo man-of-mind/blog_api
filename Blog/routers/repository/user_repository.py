@@ -9,6 +9,7 @@ def create(request: schemas.User, db: Session):
     db.add(new_user)
     db.commit()
     db.refresh(new_user)
+    print(new_user.id)
     return new_user
 
 def show(user_id: int, db: Session):

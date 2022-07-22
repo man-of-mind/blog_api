@@ -9,7 +9,7 @@ def get_all(db: Session):
 
 
 def create(request: schemas.Post, db: Session):
-    new_blog_post = models.Post(title=request.title, body=request.body, snippet=request.snippet, posted_on=request.posted_on)
+    new_blog_post = models.Post(title=request.title, body=request.body, snippet=request.snippet, posted_on=request.posted_on, user_id = request.user_id)
     db.add(new_blog_post)
     db.commit()
     db.refresh(new_blog_post)

@@ -8,10 +8,9 @@ class PostBase(BaseModel):
     snippet: Union[str, None] = None
     body: str
     posted_on: datetime
-
-class Post(PostBase):
     user_id: int
 
+class Post(PostBase):
     class Config:
         orm_mode = True
 
@@ -130,6 +129,7 @@ class User(BaseModel):
         
 
 class ShowUser(BaseModel):
+    id: int
     name: str
     email: str
     is_admin: Boolean
@@ -145,6 +145,7 @@ class ShowPost(BaseModel):
     snippet: str
     posted_on: datetime
     added_by: ShowUser
+    id: int
     
     class Config():
         orm_mode = True
@@ -161,4 +162,4 @@ class Token(BaseModel):
 
 
 class TokenData(BaseModel):
-    username: Union[str, None] = None
+    email: Union[str, None] = None

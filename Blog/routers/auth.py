@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from datetime import timedelta
-from Blog import schemas, models
+from fastapi.security import OAuth2PasswordRequestForm
+from Blog import models
 from Blog.database import get_db
 from sqlalchemy.orm import Session
 from Blog.hashing import Hash
@@ -12,7 +13,7 @@ router = APIRouter(
 )
 
 @router.post('/login')
-def login(request: schemas.Login, db: Session= Depends(get_db)):
+def login(request: OAuth2PasswordRequestForm = Depends(), db: Session= Depends(get_db)):
     user = db.query(models.User).filter(models.User.email == request.username).first()
     if not user:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Invalid credentials')
@@ -20,6 +21,6 @@ def login(request: schemas.Login, db: Session= Depends(get_db)):
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail='Incorrect password')
     access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
     access_token = create_access_token(
-        data={"sub": user.username}, expires_delta=access_token_expires
+        data={"sub": user.email}, expires_delta=access_token_expires
     )
-    return user
+    return {"access_token": access_token, "token_type": "bearer"}
